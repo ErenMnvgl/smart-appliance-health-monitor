@@ -2,9 +2,9 @@
   "name": "smart-appliance-backend",
   "version": "1.0.0",
   "description": "Backend server for Smart Appliance Connection and Health Monitor",
-  "main": "server.js",
+  "main": "src/server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node src/server.js"
   },
   "keywords": [],
   "author": "",
