@@ -30,4 +30,18 @@ router.get("/appliances", (req, res) => {
   res.json(appliances);
 });
 
+router.get("/appliances/:id", (req, res) => {
+  const id = Number(req.params.id);
+
+  const appliance = appliances.find((item) => item.id === id);
+
+  if (!appliance) {
+    return res.status(404).json({
+      message: "Appliance not found"
+    });
+  }
+
+  res.json(appliance);
+});
+
 module.exports = router;
