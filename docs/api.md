@@ -1,63 +1,269 @@
-# API Design
 
-This document describes the REST API endpoints of the project.
+# API Documentation
 
-## Devices
+Base URL:
 
-### GET /api/devices
+```text
+http://localhost:3000
+```
 
-Returns all registered devices.
+## Health Check
 
-### GET /api/devices/:id
+### GET /api/health
 
-Returns one device by id.
+Backend server'ın çalışıp çalışmadığını kontrol eder.
 
-### POST /api/devices
+#### Response
 
-Creates a new device.
+```json
+{
+  "status": "ok",
+  "service": "Smart Appliance Connection & Health Monitor Backend"
+}
+```
 
-### PATCH /api/devices/:id
+---
 
-Updates an existing device.
+## Appliances
 
-### DELETE /api/devices/:id
+### GET /api/appliances
 
-Deletes a device.
+Tüm cihazları listeler.
 
-## Sensor Logs
+#### Response
 
-### POST /api/devices/:id/sensor-logs
+```json
+[
+  {
+    "id": 1,
+    "name": "Washing Machine",
+    "type": "washer",
+    "status": "online",
+    "health": "good"
+  },
+  {
+    "id": 2,
+    "name": "Refrigerator",
+    "type": "fridge",
+    "status": "online",
+    "health": "warning"
+  },
+  {
+    "id": 3,
+    "name": "Dishwasher",
+    "type": "dishwasher",
+    "status": "offline",
+    "health": "unknown"
+  }
+]
+```
 
-Creates a new sensor log for a device.
+---
 
-### GET /api/devices/:id/sensor-logs
+### GET /api/appliances/:id
 
-Returns sensor logs of a device.
+ID değerine göre tek cihaz getirir.
 
-### GET /api/devices/:id/latest-sensor-log
+#### Path Parameters
 
-Returns the latest sensor data of a device.
+| Name | Type | Description |
+|---|---|---|
+| id | number | Cihaz ID değeri |
 
-## Error Logs
+#### Success Response
 
-### GET /api/devices/:id/errors
+```json
+{
+  "id": 1,
+  "name": "Washing Machine",
+  "type": "washer",
+  "status": "online",
+  "health": "good"
+}
+```
 
-Returns error logs of a device.
+#### Error Response
 
-### POST /api/devices/:id/errors
+```json
+{
+  "message": "Appliance not found"
+}
+```
 
-Creates a new error log for a device.
+---
 
-### PATCH /api/errors/:id/resolve
+### POST /api/appliances
 
-Marks an error as resolved.
+Yeni cihaz ekler.
 
-## Dashboard
+#### Request Body
 
-### GET /api/dashboard/summary
+```json
+{
+  "name": "Smart Oven",
+  "type": "oven",
+  "status": "online",
+  "health": "good"
+}
+```
 
-Returns dashboard summary data.
+#### Success Response
 
-### GET /api/dashboard/alerts
+```json
+{
+  "id": 4,
+  "name": "Smart Oven",
+  "type": "oven",
+  "status": "online",
+  "health": "good"
+}
+```
 
-Returns active alerts.
+#### Error Response
+
+```json
+{
+  "message": "name, type, status and health are required"
+}
+```
+
+---
+
+### PATCH /api/appliances/:id/status
+
+Cihazın bağlantı durumunu günceller.
+
+#### Path Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| id | number | Cihaz ID değeri |
+
+#### Request Body
+
+```json
+{
+  "status": "offline"
+}
+```
+
+#### Success Response
+
+```json
+{
+  "id": 1,
+  "name": "Washing Machine",
+  "type": "washer",
+  "status": "offline",
+  "health": "good"
+}
+```
+
+#### Error Responses
+
+```json
+{
+  "message": "Appliance not found"
+}
+```
+
+```json
+{
+  "message": "status is required"
+}
+```
+
+---
+
+### PATCH /api/appliances/:id/health
+
+Cihazın sağlık durumunu günceller.
+
+#### Path Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| id | number | Cihaz ID değeri |
+
+#### Request Body
+
+```json
+{
+  "health": "critical"
+}
+```
+
+#### Success Response
+
+```json
+{
+  "id": 2,
+  "name": "Refrigerator",
+  "type": "fridge",
+  "status": "online",
+  "health": "critical"
+}
+```
+
+#### Error Responses
+
+```json
+{
+  "message": "Appliance not found"
+}
+```
+
+```json
+{
+  "message": "health is required"
+}
+```
+
+---
+
+### DELETE /api/appliances/:id
+
+ID değerine göre cihaz siler.
+
+#### Path Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| id | number | Cihaz ID değeri |
+
+#### Success Response
+
+```json
+{
+  "message": "Appliance deleted successfully",
+  "appliance": {
+    "id": 3,
+    "name": "Dishwasher",
+    "type": "dishwasher",
+    "status": "offline",
+    "health": "unknown"
+  }
+}
+```
+
+#### Error Response
+
+```json
+{
+  "message": "Appliance not found"
+}
+```
+
+---
+
+## Current Endpoint List
+
+```text
+GET     /api/health
+GET     /api/appliances
+GET     /api/appliances/:id
+POST    /api/appliances
+PATCH   /api/appliances/:id/status
+PATCH   /api/appliances/:id/health
+DELETE  /api/appliances/:id
+```
