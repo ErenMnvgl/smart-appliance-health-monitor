@@ -112,4 +112,23 @@ router.patch("/appliances/:id/health", (req, res) => {
   res.json(appliance);
 });
 
+router.delete("/appliances/:id", (req, res) => {
+  const id = Number(req.params.id);
+
+  const applianceIndex = appliances.findIndex((item) => item.id === id);
+
+  if (applianceIndex === -1) {
+    return res.status(404).json({
+      message: "Appliance not found"
+    });
+  }
+
+  const deletedAppliance = appliances.splice(applianceIndex, 1);
+
+  res.json({
+    message: "Appliance deleted successfully",
+    appliance: deletedAppliance[0]
+  });
+});
+
 module.exports = router;
