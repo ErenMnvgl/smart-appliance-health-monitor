@@ -66,4 +66,27 @@ router.post("/appliances", (req, res) => {
   res.status(201).json(newAppliance);
 });
 
+router.patch("/appliances/:id/status", (req, res) => {
+  const id = Number(req.params.id);
+  const { status } = req.body;
+
+  const appliance = appliances.find((item) => item.id === id);
+
+  if (!appliance) {
+    return res.status(404).json({
+      message: "Appliance not found"
+    });
+  }
+
+  if (!status) {
+    return res.status(400).json({
+      message: "status is required"
+    });
+  }
+
+  appliance.status = status;
+
+  res.json(appliance);
+});
+
 module.exports = router;
