@@ -44,4 +44,26 @@ router.get("/appliances/:id", (req, res) => {
   res.json(appliance);
 });
 
+router.post("/appliances", (req, res) => {
+  const { name, type, status, health } = req.body;
+
+  if (!name || !type || !status || !health) {
+    return res.status(400).json({
+      message: "name, type, status and health are required"
+    });
+  }
+
+  const newAppliance = {
+    id: appliances.length + 1,
+    name,
+    type,
+    status,
+    health
+  };
+
+  appliances.push(newAppliance);
+
+  res.status(201).json(newAppliance);
+});
+
 module.exports = router;
