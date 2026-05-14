@@ -1,19 +1,26 @@
-
 # API Documentation
 
-Base URL:
+## Base URL
 
 ```text
 http://localhost:3000
 ```
 
-## Health Check
+---
 
-### GET /api/health
+# Health Check
+
+## GET /api/health
 
 Backend server'ın çalışıp çalışmadığını kontrol eder.
 
-#### Response
+### Request
+
+```bash
+curl http://localhost:3000/api/health
+```
+
+### Success Response
 
 ```json
 {
@@ -24,13 +31,83 @@ Backend server'ın çalışıp çalışmadığını kontrol eder.
 
 ---
 
-## Appliances
+# Appliances
 
-### GET /api/appliances
+## Validation Rules
+
+Appliance API sadece belirli `status` ve `health` değerlerini kabul eder.
+
+### Valid status values
+
+```text
+online
+offline
+```
+
+### Valid health values
+
+```text
+good
+warning
+critical
+unknown
+```
+
+Geçersiz değer gönderilirse API `400 Bad Request` cevabı döndürür.
+
+---
+
+## Appliance Object Structure
+
+Bir appliance nesnesi şu alanlardan oluşur:
+
+```json
+{
+  "id": 1,
+  "name": "Washing Machine",
+  "type": "washer",
+  "status": "online",
+  "health": "good"
+}
+```
+
+### Fields
+
+| Field | Type | Description |
+|---|---|---|
+| id | number | Cihazın benzersiz ID değeri |
+| name | string | Cihaz adı |
+| type | string | Cihaz tipi |
+| status | string | Cihazın bağlantı durumu |
+| health | string | Cihazın sağlık durumu |
+
+---
+
+# Endpoint List
+
+```text
+GET     /api/health
+GET     /api/appliances
+GET     /api/appliances/:id
+POST    /api/appliances
+PATCH   /api/appliances/:id/status
+PATCH   /api/appliances/:id/health
+DELETE  /api/appliances/:id
+```
+
+---
+
+# GET /api/appliances
 
 Tüm cihazları listeler.
 
-#### Response
+## Request
+
+```bash
+curl http://localhost:3000/api/appliances
+```
+
+## Success Response
 
 ```json
 [
@@ -60,17 +137,23 @@ Tüm cihazları listeler.
 
 ---
 
-### GET /api/appliances/:id
+# GET /api/appliances/:id
 
 ID değerine göre tek cihaz getirir.
 
-#### Path Parameters
+## Path Parameters
 
-| Name | Type | Description |
-|---|---|---|
-| id | number | Cihaz ID değeri |
+| Name | Type | Required | Description |
+|---|---|---|---|
+| id | number | yes | Cihaz ID değeri |
 
-#### Success Response
+## Request
+
+```bash
+curl http://localhost:3000/api/appliances/1
+```
+
+## Success Response
 
 ```json
 {
@@ -82,7 +165,9 @@ ID değerine göre tek cihaz getirir.
 }
 ```
 
-#### Error Response
+## Error Response
+
+### 404 Not Found
 
 ```json
 {
@@ -92,11 +177,17 @@ ID değerine göre tek cihaz getirir.
 
 ---
 
-### POST /api/appliances
+# POST /api/appliances
 
 Yeni cihaz ekler.
 
-#### Request Body
+## Request Headers
+
+```text
+Content-Type: application/json
+```
+
+## Request Body
 
 ```json
 {
@@ -107,7 +198,17 @@ Yeni cihaz ekler.
 }
 ```
 
-#### Success Response
+## Request
+
+```bash
+curl -X POST http://localhost:3000/api/appliances \
+-H "Content-Type: application/json" \
+-d '{"name":"Smart Oven","type":"oven","status":"online","health":"good"}'
+```
+
+## Success Response
+
+### 201 Created
 
 ```json
 {
@@ -119,7 +220,11 @@ Yeni cihaz ekler.
 }
 ```
 
-#### Error Response
+## Error Responses
+
+### 400 Bad Request
+
+Eksik alan gönderilirse:
 
 ```json
 {
@@ -127,19 +232,41 @@ Yeni cihaz ekler.
 }
 ```
 
+Geçersiz `status` gönderilirse:
+
+```json
+{
+  "message": "status must be online or offline"
+}
+```
+
+Geçersiz `health` gönderilirse:
+
+```json
+{
+  "message": "health must be good, warning, critical or unknown"
+}
+```
+
 ---
 
-### PATCH /api/appliances/:id/status
+# PATCH /api/appliances/:id/status
 
 Cihazın bağlantı durumunu günceller.
 
-#### Path Parameters
+## Path Parameters
 
-| Name | Type | Description |
-|---|---|---|
-| id | number | Cihaz ID değeri |
+| Name | Type | Required | Description |
+|---|---|---|---|
+| id | number | yes | Cihaz ID değeri |
 
-#### Request Body
+## Request Headers
+
+```text
+Content-Type: application/json
+```
+
+## Request Body
 
 ```json
 {
@@ -147,7 +274,15 @@ Cihazın bağlantı durumunu günceller.
 }
 ```
 
-#### Success Response
+## Request
+
+```bash
+curl -X PATCH http://localhost:3000/api/appliances/1/status \
+-H "Content-Type: application/json" \
+-d '{"status":"offline"}'
+```
+
+## Success Response
 
 ```json
 {
@@ -159,7 +294,11 @@ Cihazın bağlantı durumunu günceller.
 }
 ```
 
-#### Error Responses
+## Error Responses
+
+### 404 Not Found
+
+Cihaz bulunamazsa:
 
 ```json
 {
@@ -167,25 +306,43 @@ Cihazın bağlantı durumunu günceller.
 }
 ```
 
+### 400 Bad Request
+
+`status` gönderilmezse:
+
 ```json
 {
   "message": "status is required"
 }
 ```
 
+Geçersiz `status` gönderilirse:
+
+```json
+{
+  "message": "status must be online or offline"
+}
+```
+
 ---
 
-### PATCH /api/appliances/:id/health
+# PATCH /api/appliances/:id/health
 
 Cihazın sağlık durumunu günceller.
 
-#### Path Parameters
+## Path Parameters
 
-| Name | Type | Description |
-|---|---|---|
-| id | number | Cihaz ID değeri |
+| Name | Type | Required | Description |
+|---|---|---|---|
+| id | number | yes | Cihaz ID değeri |
 
-#### Request Body
+## Request Headers
+
+```text
+Content-Type: application/json
+```
+
+## Request Body
 
 ```json
 {
@@ -193,7 +350,15 @@ Cihazın sağlık durumunu günceller.
 }
 ```
 
-#### Success Response
+## Request
+
+```bash
+curl -X PATCH http://localhost:3000/api/appliances/2/health \
+-H "Content-Type: application/json" \
+-d '{"health":"critical"}'
+```
+
+## Success Response
 
 ```json
 {
@@ -205,7 +370,11 @@ Cihazın sağlık durumunu günceller.
 }
 ```
 
-#### Error Responses
+## Error Responses
+
+### 404 Not Found
+
+Cihaz bulunamazsa:
 
 ```json
 {
@@ -213,25 +382,43 @@ Cihazın sağlık durumunu günceller.
 }
 ```
 
+### 400 Bad Request
+
+`health` gönderilmezse:
+
 ```json
 {
   "message": "health is required"
 }
 ```
 
+Geçersiz `health` gönderilirse:
+
+```json
+{
+  "message": "health must be good, warning, critical or unknown"
+}
+```
+
 ---
 
-### DELETE /api/appliances/:id
+# DELETE /api/appliances/:id
 
 ID değerine göre cihaz siler.
 
-#### Path Parameters
+## Path Parameters
 
-| Name | Type | Description |
-|---|---|---|
-| id | number | Cihaz ID değeri |
+| Name | Type | Required | Description |
+|---|---|---|---|
+| id | number | yes | Cihaz ID değeri |
 
-#### Success Response
+## Request
+
+```bash
+curl -X DELETE http://localhost:3000/api/appliances/3
+```
+
+## Success Response
 
 ```json
 {
@@ -246,7 +433,9 @@ ID değerine göre cihaz siler.
 }
 ```
 
-#### Error Response
+## Error Response
+
+### 404 Not Found
 
 ```json
 {
@@ -256,14 +445,18 @@ ID değerine göre cihaz siler.
 
 ---
 
-## Current Endpoint List
+# Notes
+
+Şu an backend tarafında veriler mock data olarak tutulur.
+
+Mock data şu dosyadadır:
 
 ```text
-GET     /api/health
-GET     /api/appliances
-GET     /api/appliances/:id
-POST    /api/appliances
-PATCH   /api/appliances/:id/status
-PATCH   /api/appliances/:id/health
-DELETE  /api/appliances/:id
+backend/src/data/appliances.js
 ```
+
+Eklenen, güncellenen veya silinen cihazlar sadece server çalıştığı sürece bellekte kalır.
+
+Server yeniden başlatıldığında cihaz listesi tekrar varsayılan mock data haline döner.
+
+İlerleyen aşamalarda bu yapı database ile değiştirilecektir.
