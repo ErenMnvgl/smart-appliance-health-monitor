@@ -1,25 +1,22 @@
 const request = require("supertest");
 const app = require("../src/app");
-const appliances = require("../src/data/appliances");
+const { getDb } = require("../src/config/database");
+const { initDatabase } = require("../src/data/init");
 
-// A deep copy of the original appliances data to restore it before each test
 const initialAppliancesState = [
   {
-    id: 1,
     name: "Washing Machine",
     type: "washer",
     status: "online",
     health: "good"
   },
   {
-    id: 2,
     name: "Refrigerator",
     type: "fridge",
     status: "online",
     health: "warning"
   },
   {
-    id: 3,
     name: "Dishwasher",
     type: "dishwasher",
     status: "offline",
@@ -27,12 +24,24 @@ const initialAppliancesState = [
   }
 ];
 
-beforeEach(() => {
-  // Clear the in-memory array and restore the initial data
-  appliances.length = 0;
-  initialAppliancesState.forEach(item => {
-    appliances.push({ ...item });
-  });
+beforeAll(async () => {
+  // Ensure we are in test mode so we use memory DB
+  process.env.NODE_ENV = 'test';
+  await initDatabase();
+});
+
+beforeEach(async () => {
+  const db = await getDb();
+  await db.exec("DELETE FROM appliances");
+  // Reset AUTOINCREMENT
+  await db.exec("DELETE FROM sqlite_sequence WHERE name='appliances'"); 
+  
+  for (const item of initialAppliancesState) {
+    await db.run(
+      "INSERT INTO appliances (name, type, status, health) VALUES (?, ?, ?, ?)",
+      [item.name, item.type, item.status, item.health]
+    );
+  }
 });
 
 describe("Health API", () => {

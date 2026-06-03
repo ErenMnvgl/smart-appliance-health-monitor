@@ -1,92 +1,117 @@
-const appliances = require("../data/appliances");
+const { getDb } = require("../config/database");
 
-
-
-const getAppliances = (req, res) => {
-  res.json(appliances);
-};
-
-const getApplianceById = (req, res) => {
-  const id = Number(req.params.id);
-
-  const appliance = appliances.find((item) => item.id === id);
-
-  if (!appliance) {
-    return res.status(404).json({
-      message: "Appliance not found"
-    });
+const getAppliances = async (req, res) => {
+  try {
+    const db = await getDb();
+    const appliances = await db.all("SELECT * FROM appliances");
+    res.json(appliances);
+  } catch (error) {
+    res.status(500).json({ message: "Database error", error: error.message });
   }
-
-  res.json(appliance);
 };
 
-const createAppliance = (req, res) => {
-  const { name, type, status, health } = req.body;
+const getApplianceById = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const db = await getDb();
+    const appliance = await db.get("SELECT * FROM appliances WHERE id = ?", [id]);
 
-  const newAppliance = {
-    id: appliances.length + 1,
-    name,
-    type,
-    status,
-    health
-  };
+    if (!appliance) {
+      return res.status(404).json({ message: "Appliance not found" });
+    }
 
-  appliances.push(newAppliance);
-
-  res.status(201).json(newAppliance);
-};
-
-const updateApplianceStatus = (req, res) => {
-  const id = Number(req.params.id);
-  const { status } = req.body;
-
-  const appliance = appliances.find((item) => item.id === id);
-
-  if (!appliance) {
-    return res.status(404).json({
-      message: "Appliance not found"
-    });
+    res.json(appliance);
+  } catch (error) {
+    res.status(500).json({ message: "Database error", error: error.message });
   }
-
-  appliance.status = status;
-
-  res.json(appliance);
 };
 
-const updateApplianceHealth = (req, res) => {
-  const id = Number(req.params.id);
-  const { health } = req.body;
+const createAppliance = async (req, res) => {
+  try {
+    const { name, type, status, health } = req.body;
+    const db = await getDb();
+    
+    const result = await db.run(
+      "INSERT INTO appliances (name, type, status, health) VALUES (?, ?, ?, ?)",
+      [name, type, status, health]
+    );
 
-  const appliance = appliances.find((item) => item.id === id);
+    const newAppliance = {
+      id: result.lastID,
+      name,
+      type,
+      status,
+      health
+    };
 
-  if (!appliance) {
-    return res.status(404).json({
-      message: "Appliance not found"
-    });
+    res.status(201).json(newAppliance);
+  } catch (error) {
+    res.status(500).json({ message: "Database error", error: error.message });
   }
-
-  appliance.health = health;
-
-  res.json(appliance);
 };
 
-const deleteAppliance = (req, res) => {
-  const id = Number(req.params.id);
+const updateApplianceStatus = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { status } = req.body;
+    const db = await getDb();
 
-  const applianceIndex = appliances.findIndex((item) => item.id === id);
+    const appliance = await db.get("SELECT * FROM appliances WHERE id = ?", [id]);
 
-  if (applianceIndex === -1) {
-    return res.status(404).json({
-      message: "Appliance not found"
-    });
+    if (!appliance) {
+      return res.status(404).json({ message: "Appliance not found" });
+    }
+
+    await db.run("UPDATE appliances SET status = ? WHERE id = ?", [status, id]);
+    
+    appliance.status = status;
+    res.json(appliance);
+  } catch (error) {
+    res.status(500).json({ message: "Database error", error: error.message });
   }
+};
 
-  const deletedAppliance = appliances.splice(applianceIndex, 1);
+const updateApplianceHealth = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { health } = req.body;
+    const db = await getDb();
 
-  res.json({
-    message: "Appliance deleted successfully",
-    appliance: deletedAppliance[0]
-  });
+    const appliance = await db.get("SELECT * FROM appliances WHERE id = ?", [id]);
+
+    if (!appliance) {
+      return res.status(404).json({ message: "Appliance not found" });
+    }
+
+    await db.run("UPDATE appliances SET health = ? WHERE id = ?", [health, id]);
+    
+    appliance.health = health;
+    res.json(appliance);
+  } catch (error) {
+    res.status(500).json({ message: "Database error", error: error.message });
+  }
+};
+
+const deleteAppliance = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const db = await getDb();
+
+    const appliance = await db.get("SELECT * FROM appliances WHERE id = ?", [id]);
+
+    if (!appliance) {
+      return res.status(404).json({ message: "Appliance not found" });
+    }
+
+    await db.run("DELETE FROM appliances WHERE id = ?", [id]);
+
+    res.json({
+      message: "Appliance deleted successfully",
+      appliance
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Database error", error: error.message });
+  }
 };
 
 module.exports = {

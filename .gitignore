@@ -4,4 +4,4 @@ node_modules
 dist
 build
 __pycache__
-.venv
+.venvbackend/database.sqlite
