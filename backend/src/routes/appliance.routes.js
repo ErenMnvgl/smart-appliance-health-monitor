@@ -9,13 +9,19 @@ const {
   deleteAppliance
 } = require("../controllers/appliance.controller");
 
+const {
+  validateApplianceCreate,
+  validateApplianceStatusUpdate,
+  validateApplianceHealthUpdate
+} = require("../validators/appliance.validator");
+
 const router = express.Router();
 
 router.get("/appliances", getAppliances);
 router.get("/appliances/:id", getApplianceById);
-router.post("/appliances", createAppliance);
-router.patch("/appliances/:id/status", updateApplianceStatus);
-router.patch("/appliances/:id/health", updateApplianceHealth);
+router.post("/appliances", validateApplianceCreate, createAppliance);
+router.patch("/appliances/:id/status", validateApplianceStatusUpdate, updateApplianceStatus);
+router.patch("/appliances/:id/health", validateApplianceHealthUpdate, updateApplianceHealth);
 router.delete("/appliances/:id", deleteAppliance);
 
 module.exports = router;

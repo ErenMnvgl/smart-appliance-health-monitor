@@ -1,7 +1,6 @@
 const appliances = require("../data/appliances");
 
-const validStatuses = ["online", "offline"];
-const validHealthStates = ["good", "warning", "critical", "unknown"];
+
 
 const getAppliances = (req, res) => {
   res.json(appliances);
@@ -23,24 +22,6 @@ const getApplianceById = (req, res) => {
 
 const createAppliance = (req, res) => {
   const { name, type, status, health } = req.body;
-
-  if (!name || !type || !status || !health) {
-    return res.status(400).json({
-      message: "name, type, status and health are required"
-    });
-  }
-
-  if (!validStatuses.includes(status)) {
-    return res.status(400).json({
-      message: "status must be online or offline"
-    });
-  }
-
-  if (!validHealthStates.includes(health)) {
-    return res.status(400).json({
-      message: "health must be good, warning, critical or unknown"
-    });
-  }
 
   const newAppliance = {
     id: appliances.length + 1,
@@ -67,18 +48,6 @@ const updateApplianceStatus = (req, res) => {
     });
   }
 
-  if (!status) {
-    return res.status(400).json({
-      message: "status is required"
-    });
-  }
-
-  if (!validStatuses.includes(status)) {
-    return res.status(400).json({
-      message: "status must be online or offline"
-    });
-  }
-
   appliance.status = status;
 
   res.json(appliance);
@@ -93,18 +62,6 @@ const updateApplianceHealth = (req, res) => {
   if (!appliance) {
     return res.status(404).json({
       message: "Appliance not found"
-    });
-  }
-
-  if (!health) {
-    return res.status(400).json({
-      message: "health is required"
-    });
-  }
-
-  if (!validHealthStates.includes(health)) {
-    return res.status(400).json({
-      message: "health must be good, warning, critical or unknown"
     });
   }
 
