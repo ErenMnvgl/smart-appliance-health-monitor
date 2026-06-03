@@ -1,0 +1,156 @@
+.app {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 32px 32px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background-color: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--radius);
+  animation: fadeInUp 0.25s ease both;
+}
+
+.error-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--danger);
+  flex-shrink: 0;
+}
+
+.error-text {
+  flex: 1;
+}
+
+.error-message {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.error-detail {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.error-retry {
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  background-color: var(--danger);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  transition: background-color 0.15s ease;
+}
+
+.error-retry:hover {
+  background-color: var(--danger-hover);
+}
+
+.error-retry:active {
+  transform: scale(0.97);
+}
+
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.skeleton-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.skeleton-line {
+  height: 14px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--bg-elevated) 0%,
+    var(--bg-base) 50%,
+    var(--bg-elevated) 100%
+  );
+  background-size: 400px 100%;
+  animation: shimmer 1.6s infinite ease-in-out;
+}
+
+.skeleton-wide {
+  width: 60%;
+}
+
+.skeleton-medium {
+  width: 40%;
+}
+
+.skeleton-narrow {
+  width: 30%;
+}
+
+.skeleton-chips-row {
+  display: flex;
+  gap: 8px;
+}
+
+.skeleton-chip {
+  width: 72px;
+  height: 26px;
+  border-radius: var(--radius);
+  background: linear-gradient(
+    90deg,
+    var(--bg-elevated) 0%,
+    var(--bg-base) 50%,
+    var(--bg-elevated) 100%
+  );
+  background-size: 400px 100%;
+  animation: shimmer 1.6s infinite ease-in-out;
+}
+
+@media (min-width: 640px) {
+  .skeleton-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .skeleton-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 639px) {
+  .main-content {
+    padding: 16px;
+  }
+
+  .error-banner {
+    flex-wrap: wrap;
+  }
+
+  .error-retry {
+    width: 100%;
+    text-align: center;
+  }
+}
