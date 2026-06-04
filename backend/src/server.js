@@ -1,7 +1,7 @@
 const app = require("./app");
 const { initDatabase } = require("./data/init");
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3002;
 
 const startServer = async () => {
   await initDatabase();

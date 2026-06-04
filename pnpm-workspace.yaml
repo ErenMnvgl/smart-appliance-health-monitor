@@ -1,0 +1,7 @@
+packages:
+  - "frontend"
+  - "backend"
+allowBuilds:
+  sharp: true
+  sqlite3: true
+  unrs-resolver: true

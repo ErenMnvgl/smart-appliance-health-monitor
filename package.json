@@ -1,0 +1,11 @@
+{
+  "name": "smart-appliance-health-monitor",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "tunnel": "node tunnel-proxy.js"
+  },
+  "devDependencies": {
+    "http-proxy": "^1.18.1"
+  }
+}
