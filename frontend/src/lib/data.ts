@@ -1,0 +1,56 @@
+export const APPLIANCES = [
+  {
+    id: "v-air-fryer-01",
+    name: "Smart Air Fryer",
+    category: "Cooking",
+    status: "online",
+    health: "good",
+    temp: "180°C",
+    usage: "Active",
+  },
+  {
+    id: "v-tea-maker-02",
+    name: "Vestel Ziyafet Tea Maker",
+    category: "Beverage",
+    status: "online",
+    health: "good",
+    temp: "95°C",
+    usage: "Standby",
+  },
+  {
+    id: "v-vacuum-03",
+    name: "Robot Vacuum V-Bot",
+    category: "Cleaning",
+    status: "online",
+    health: "warning",
+    temp: "45°C",
+    usage: "Charging (Filter Check)",
+  },
+  {
+    id: "v-mixer-04",
+    name: "Stand Mixer Tarçın",
+    category: "Food Prep",
+    status: "offline",
+    health: "unknown",
+    temp: "-",
+    usage: "Off",
+  },
+  {
+    id: "v-grill-05",
+    name: "Tost Makinesi Inox",
+    category: "Cooking",
+    status: "online",
+    health: "good",
+    temp: "220°C",
+    usage: "Preheating",
+  },
+];
+
+export const SYSTEM_METRICS = {
+  totalConnected: 12,
+  online: 11,
+  offline: 1,
+  alerts: 1,
+  healthScore: 92,
+  uptime: "99.9%",
+};
