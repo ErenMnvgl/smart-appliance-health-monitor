@@ -7,7 +7,7 @@ const NEXT_PORT = 3000;
 const PROXY_PORT = 3005;
 
 const proxy = httpProxy.createProxyServer({
-  target: `http://localhost:${NEXT_PORT}`,
+  target: `http://127.0.0.1:${NEXT_PORT}`,
   ws: true,
   changeOrigin: true,
 });

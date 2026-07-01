@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
-import { useScroll, useTransform, motion } from "framer-motion";
+import { useRef, useEffect, useState, useCallback } from "react";
+import { useTransform, motion } from "framer-motion";
 
 export default function ImageSequenceScroll({ scrollProgress }: { scrollProgress: any }) {
   const frameCount = 277;
@@ -10,22 +10,42 @@ export default function ImageSequenceScroll({ scrollProgress }: { scrollProgress
   const extension = "jpg";
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [images, setImages] = useState<HTMLImageElement[]>([]);
+  const imagesRef = useRef<HTMLImageElement[]>([]);
+  const lastDrawnFrame = useRef<number>(-1);
+  const rafId = useRef<number>(0);
+  const pendingFrame = useRef<number>(0);
   const [loaded, setLoaded] = useState(false);
 
-  // Map 0 -> 1 progress to 1 -> 277 frames
   const currentIndex = useTransform(scrollProgress, [0, 1], [1, frameCount]);
 
+  const drawCover = useCallback((ctx: CanvasRenderingContext2D, img: HTMLImageElement, cw: number, ch: number) => {
+    const iw = img.naturalWidth;
+    const ih = img.naturalHeight;
+    const imgRatio = iw / ih;
+    const canvasRatio = cw / ch;
+
+    let sx = 0, sy = 0, sw = iw, sh = ih;
+
+    if (imgRatio > canvasRatio) {
+      sw = ih * canvasRatio;
+      sx = (iw - sw) / 2;
+    } else {
+      sh = iw / canvasRatio;
+      sy = (ih - sh) / 2;
+    }
+
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, cw, ch);
+  }, []);
+
   useEffect(() => {
-    // Preload images
     let loadedCount = 0;
     const imgArray: HTMLImageElement[] = [];
 
     for (let i = 1; i <= frameCount; i++) {
       const img = new Image();
-      // Format number to 3 digits (e.g., 001, 042)
       const formattedNum = i.toString().padStart(3, "0");
       img.src = `${folderPath}/${prefix}${formattedNum}.${extension}`;
+      img.decoding = "async";
       img.onload = () => {
         loadedCount++;
         if (loadedCount === frameCount) {
@@ -34,46 +54,75 @@ export default function ImageSequenceScroll({ scrollProgress }: { scrollProgress
       };
       imgArray.push(img);
     }
-    setImages(imgArray);
+    imagesRef.current = imgArray;
   }, [frameCount, folderPath, prefix, extension]);
 
   useEffect(() => {
-    if (!loaded || !canvasRef.current) return;
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
+    if (!canvas) return;
+
+    const resize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      lastDrawnFrame.current = -1;
+    };
+
+    resize();
+    window.addEventListener("resize", resize);
+    return () => window.removeEventListener("resize", resize);
+  }, []);
+
+  useEffect(() => {
+    if (!loaded) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
 
-    // Draw initial frame
-    const img = images[0];
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    const firstImg = imagesRef.current[0];
+    if (firstImg) {
+      drawCover(ctx, firstImg, canvas.width, canvas.height);
+      lastDrawnFrame.current = 0;
+    }
 
-    // Subscribe to scroll changes to draw corresponding frame
-    const unsubscribe = currentIndex.on("change", (latest) => {
-      const frameIndex = Math.min(Math.max(1, Math.floor(latest)), frameCount) - 1;
-      const currentImage = images[frameIndex];
-      if (currentImage && ctx) {
-        // Clear and draw
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(currentImage, 0, 0, canvas.width, canvas.height);
+    const drawFrame = () => {
+      const frameIndex = pendingFrame.current;
+      if (frameIndex === lastDrawnFrame.current) {
+        rafId.current = 0;
+        return;
+      }
+
+      const img = imagesRef.current[frameIndex];
+      if (img && img.complete) {
+        drawCover(ctx, img, canvas.width, canvas.height);
+        lastDrawnFrame.current = frameIndex;
+      }
+      rafId.current = 0;
+    };
+
+    const unsubscribe = currentIndex.on("change", (latest: number) => {
+      pendingFrame.current = Math.min(Math.max(1, Math.floor(latest)), frameCount) - 1;
+      if (!rafId.current) {
+        rafId.current = requestAnimationFrame(drawFrame);
       }
     });
 
-    return () => unsubscribe();
-  }, [loaded, images, currentIndex, frameCount]);
-
-  // The background opacity scales down slightly at the very end when the footer appears
-  const opacity = useTransform(scrollProgress, [0, 0.9, 1], [1, 1, 0.2]);
+    return () => {
+      unsubscribe();
+      if (rafId.current) cancelAnimationFrame(rafId.current);
+    };
+  }, [loaded, currentIndex, frameCount, drawCover]);
 
   return (
-    <motion.div style={{ opacity }} className="fixed inset-0 w-full h-screen bg-black z-0 pointer-events-none">
+    <div className="fixed inset-0 w-full h-screen bg-black z-0 pointer-events-none">
       <canvas
         ref={canvasRef}
-        width={1920}
-        height={1080}
-        className="w-full h-full object-cover opacity-70 mix-blend-screen"
+        className="w-full h-full opacity-70 mix-blend-screen"
+        style={{ willChange: "transform", imageRendering: "auto" }}
       />
-      {/* Dynamic Overlay gradient to darken the background slightly so text is always readable */}
       <div className="absolute inset-0 bg-black/40" />
-    </motion.div>
+    </div>
   );
 }

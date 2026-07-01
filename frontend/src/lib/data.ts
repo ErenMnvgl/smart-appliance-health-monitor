@@ -7,6 +7,7 @@ export const APPLIANCES = [
     health: "good",
     temp: "180°C",
     usage: "Active",
+    image: "/appliances/air-fryer.png",
   },
   {
     id: "v-tea-maker-02",
@@ -16,6 +17,7 @@ export const APPLIANCES = [
     health: "good",
     temp: "95°C",
     usage: "Standby",
+    image: "/appliances/tea-maker.png",
   },
   {
     id: "v-vacuum-03",
@@ -25,6 +27,7 @@ export const APPLIANCES = [
     health: "warning",
     temp: "45°C",
     usage: "Charging (Filter Check)",
+    image: "/appliances/robot-vacuum.png",
   },
   {
     id: "v-mixer-04",
@@ -34,6 +37,7 @@ export const APPLIANCES = [
     health: "unknown",
     temp: "-",
     usage: "Off",
+    image: "/appliances/stand-mixer.png",
   },
   {
     id: "v-grill-05",
@@ -43,6 +47,7 @@ export const APPLIANCES = [
     health: "good",
     temp: "220°C",
     usage: "Preheating",
+    image: "/appliances/grill-toaster.png",
   },
 ];
 

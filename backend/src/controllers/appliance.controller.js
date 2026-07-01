@@ -92,6 +92,42 @@ const updateApplianceHealth = async (req, res) => {
   }
 };
 
+const updateAppliance = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { name, type, status, health, category, usage, temp, healthScore } = req.body;
+    const db = await getDb();
+
+    const appliance = await db.get("SELECT * FROM appliances WHERE id = ?", [id]);
+
+    if (!appliance) {
+      return res.status(404).json({ message: "Appliance not found" });
+    }
+
+    const updates = [];
+    const params = [];
+    
+    if (name !== undefined) { updates.push("name = ?"); params.push(name); }
+    if (type !== undefined) { updates.push("type = ?"); params.push(type); }
+    if (status !== undefined) { updates.push("status = ?"); params.push(status); }
+    if (health !== undefined) { updates.push("health = ?"); params.push(health); }
+    if (category !== undefined) { updates.push("category = ?"); params.push(category); }
+    if (usage !== undefined) { updates.push("usage = ?"); params.push(usage); }
+    if (temp !== undefined) { updates.push("temp = ?"); params.push(temp); }
+    if (healthScore !== undefined) { updates.push("healthScore = ?"); params.push(healthScore); }
+
+    if (updates.length > 0) {
+      params.push(id);
+      await db.run(`UPDATE appliances SET ${updates.join(", ")} WHERE id = ?`, params);
+    }
+    
+    const updatedAppliance = await db.get("SELECT * FROM appliances WHERE id = ?", [id]);
+    res.json(updatedAppliance);
+  } catch (error) {
+    res.status(500).json({ message: "Database error", error: error.message });
+  }
+};
+
 const deleteAppliance = async (req, res) => {
   try {
     const id = Number(req.params.id);
@@ -120,5 +156,6 @@ module.exports = {
   createAppliance,
   updateApplianceStatus,
   updateApplianceHealth,
+  updateAppliance,
   deleteAppliance
 };
